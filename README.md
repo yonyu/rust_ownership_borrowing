@@ -117,11 +117,10 @@ the memory safety of your program without needing a garbage collector.
 
 **The two pillars of Rust are speed and safety.**
 
-### Ownership rules
-
-1. Each value in Rust has a variable that is its owner
-2. There can only be one owner at a time
-3. When the owner goes out of scope, the value will be dropped
+### Rules of Ownership
+- Each value in Rust has an owner
+- There can be only one owner at a time
+- When the owner goes out of scope, the value will be dropped
 
 ### Rust borrow checker enforces these rules at compile time
 1. Ensure lifetimes are correct
@@ -146,3 +145,109 @@ the memory safety of your program without needing a garbage collector.
 
 ### Non-copyable data types
 - Data types that are stored on the heap
+
+### Copy and Clone Traits
+
+- Modify the value of the previous owner won't change the value of the current owenr
+- Inheritating `#[derive(Clone)]`; It is deep copy.
+
+## Borrowing values by reference
+
+"We call the action of creating a reference borrowing. As in real life, if a person
+owns something, you can borrow it from them. When you're done, you have to give it back.
+You don't own it" -- The Rust Book, Chapter 4
+
+There are two types of references
+1. Immutable References
+2. Mutable Referenecs
+   
+### Immutable References
+
+declare references:
+
+    let x: String = String::from("Hello World!");
+    let y: &String = &x;
+
+### Mutable Referenecs
+
+To make a variable mutable, you add *mut* in front of the variable name.
+ 
+To get a mut reference to variable, you add *&mut* in front of a variable.
+
+To declare a variable as a mut reference to other variable, addd *: &mut variable_type* after the variable.
+
+    let mut x: String = String::from("Hello World!");
+    let y: &mut String = &mut x;
+
+### Reference Restrictions
+- References can never be null
+- Multiple immutable references to the same are allowed
+- Only one mutable reference to the same value per scope
+- No mixing of mutable and immutable referenecs at the same time
+
+
+### String Slices
+
+- String 
+  - Standard Library (std::string module)
+  - Growable
+  - Mutable
+  - Own their data
+- String Slice
+  - Reference to a portion of String
+  - Don't own the data they reference
+  - Data type &str
+  - Immutable
+- How to choose between String and String Slice
+  - Use String when you need to own the string data (modify, etc. heap allocated and growable)
+  - Use &str when you only need to borrow a string (a simple reference).
+  - Consider performance (If you don't need to modify the string, use &str is more efficient)
+
+## Lifetimes and borrow checker
+
+- borrow checker
+  - Compares scopes to determine whether all borrows are valid
+  
+- lifetime
+  - variables are out of scope
+  - explicitly annotating the variable's lifetime
+  - lifetime annotation
+    - Explicitly defines a generic liftime for parameters
+    - Must begin with an apostrophe (') symbol
+    - Names are conventionally single lowercase letters
+  
+    code not working:
+
+        fn best_fuel(x: &str, y; &str) -> &str {
+          if x.len() > y.len() {
+            x
+          } else {
+            y
+          }
+        }
+
+    code that works:
+
+        fn best_fuel<'a>(x: &'a str, y: &'a str) -> &'a str {
+            if x.len() > y.len() {
+              x
+            } else {
+              y
+            }
+        }
+
+    the lifetime annotation tells the lifetime of return value is as long as the lifetime of the two input parameters x and y
+
+### Lifetime Elision rules (the compiler will apply them in the code)
+
+- Set of rules for the compiler to analyze reference lifetimes
+- Describes situations that do not require erxplicit lifetime annotations
+- If any ambiguity remains, explicit annotation will b required
+- There are currently three Elision rules
+  - Rule #1. Each input parameter that is a reference is assigned its own lifetime
+  - Rule #2. If there is exactly one input lifetime, assign it to all output lifetimes
+  - Rule #3. If there is a &self or &mut self input parameter, its lifetime will be assigned to all output lifetimes
+  - To be determined
+
+If after applying the three rules, you still can't identify the lifetime, explicit lifetime rules should be provided.
+
