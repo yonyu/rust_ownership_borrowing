@@ -251,3 +251,14 @@ To declare a variable as a mut reference to other variable, addd *: &mut variabl
 
 If after applying the three rules, you still can't identify the lifetime, explicit lifetime rules should be provided.
 
+### Static lifetime
+
+- Indicates references available for entire durationof the program
+  - Example: string literals
+  
+        let : &'static str = "Greetings from Neptune";
+
+- Can be coerced to more restrictive lifetime
+- Ensure the data type will only contain `'static` elements
+  - **T: Display + 'static**
+
